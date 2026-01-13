@@ -89,7 +89,6 @@
         th { background-color: #333; color: white; }
         tr:nth-child(even) { background-color: #f2f2f2; }
 
-        /* Estilo especial para el select dentro de la tabla */
         .status-select {
             padding: 5px;
             font-size: 0.9em;
@@ -139,7 +138,7 @@
             </div>
 
             <div>
-                <label>Fecha Recepción:</label>
+                <label>Fecha Recibida:</label>
                 <input type="date" id="fechaRecepcion">
             </div>
             <div>
@@ -157,41 +156,59 @@
             </div>
 
             <div class="full-width">
-                <label>Descripción del Problema:</label>
+                <label>Descripción:</label>
                 <textarea id="descripcion" rows="3"></textarea>
             </div>
 
             <div>
                 <label>Categoría:</label>
                 <select id="categoria">
-                    <option value="Calidad">Calidad</option>
-                    <option value="Servicio">Servicio</option>
-                    <option value="Limpieza">Limpieza</option>
-                    <option value="Otro">Otro</option>
+                    <option value="calidad">calidad</option>
+                    <option value="atención">atención</option>
+                    <option value="servicio">servicio</option>
+                    <option value="otro">otro</option>
                 </select>
             </div>
+            
             <div>
                 <label>Distrito:</label>
-                <input type="text" id="distrito">
+                <select id="distrito">
+                    <option value="Distrito 1">Distrito 1</option>
+                    <option value="Distrito 2">Distrito 2</option>
+                    <option value="Distrito 3">Distrito 3</option>
+                    <option value="Distrito 4">Distrito 4</option>
+                    <option value="Distrito 5">Distrito 5</option>
+                    <option value="Distrito 6">Distrito 6</option>
+                </select>
             </div>
+            
             <div>
-                <label>SOP (Supervisor):</label>
-                <input type="text" id="sop">
+                <label>Supervisor (SOP):</label>
+                <select id="sop">
+                    <option value="Anel Santoyo">Anel Santoyo</option>
+                    <option value="Jesús Mil">Jesús Mil</option>
+                    <option value="Ulises Anda">Ulises Anda</option>
+                    <option value="Luis Villegas">Luis Villegas</option>
+                    <option value="Armando Vargas">Armando Vargas</option>
+                    <option value="Juan Piceno">Juan Piceno</option>
+                </select>
             </div>
+            
             <div>
-                <label>Tienda/Sucursal:</label>
-                <input type="text" id="tienda">
+                <label>Tienda:</label>
+                <input type="text" id="tienda" placeholder="Ej: Centro Max">
             </div>
+            
             <div>
-                <label>Acción Tomada:</label>
+                <label>Acción:</label>
                 <input type="text" id="accion">
             </div>
+            
             <div>
-                <label>Estatus Inicial:</label>
+                <label>Estatus:</label>
                 <select id="estatus">
-                    <option value="Abierta">Abierta</option>
-                    <option value="En Proceso">En Proceso</option>
-                    <option value="Cerrada">Cerrada</option>
+                    <option value="activa">activa</option>
+                    <option value="cerrada">cerrada</option>
                 </select>
             </div>
         </div>
@@ -206,7 +223,6 @@
             <button onclick="showScreen('registerScreen')">Nueva Queja</button>
         </div>
         <hr>
-        <p style="font-size:12px; color:gray;">* Puedes cambiar el estatus directamente seleccionando una opción en la columna "Estatus".</p>
         
         <div style="overflow-x:auto;">
             <table id="quejasTable">
@@ -215,9 +231,10 @@
                         <th>Fecha Rec.</th>
                         <th>Registró</th>
                         <th>Cliente</th>
-                        <th>Descripción</th>
-                        <th>Tienda</th>
-                        <th>Estatus (Editar)</th> <th>Acciones</th>
+                        <th>Supervisor</th>
+                        <th>Distrito</th>
+                        <th>Estatus (Editar)</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -285,8 +302,8 @@
                 id: Date.now()
             };
 
-            if(!queja.nomCliente || !queja.tienda) {
-                alert("Completa Cliente y Tienda.");
+            if(!queja.nomCliente) {
+                alert("Completa al menos el Nombre del Cliente.");
                 return;
             }
 
@@ -294,7 +311,7 @@
             quejas.push(queja);
             localStorage.setItem('db_quejas', JSON.stringify(quejas));
 
-            alert("Queja registrada por: " + currentUser);
+            alert("Queja registrada correctamente.");
             limpiarFormulario();
         }
 
@@ -303,6 +320,7 @@
             document.getElementById('telCliente').value = "";
             document.getElementById('descripcion').value = "";
             document.getElementById('accion').value = "";
+            document.getElementById('tienda').value = "";
         }
 
         // 4. VISUALIZAR Y CAMBIAR ESTATUS
@@ -326,9 +344,8 @@
                 // SELECT PARA CAMBIAR ESTATUS EN TIEMPO REAL
                 let selectEstatus = `
                     <select class="status-select" onchange="cambiarEstatus(${q.id}, this.value)">
-                        <option value="Abierta" ${q.estatus === 'Abierta' ? 'selected' : ''}>Abierta</option>
-                        <option value="En Proceso" ${q.estatus === 'En Proceso' ? 'selected' : ''}>En Proceso</option>
-                        <option value="Cerrada" ${q.estatus === 'Cerrada' ? 'selected' : ''}>Cerrada</option>
+                        <option value="activa" ${q.estatus === 'activa' ? 'selected' : ''}>activa</option>
+                        <option value="cerrada" ${q.estatus === 'cerrada' ? 'selected' : ''}>cerrada</option>
                     </select>
                 `;
 
@@ -336,8 +353,8 @@
                     <td>${q.fechaRecepcion}</td>
                     <td><b>${usuarioReg}</b></td>
                     <td>${q.nomCliente}</td>
-                    <td>${q.descripcion}</td>
-                    <td>${q.tienda}</td>
+                    <td>${q.sop}</td>
+                    <td>${q.distrito}</td>
                     <td>${selectEstatus}</td>
                     <td style="text-align:center;">${deleteButton}</td>
                 </tr>`;
@@ -345,17 +362,13 @@
             });
         }
 
-        // NUEVA FUNCIÓN: ACTUALIZAR ESTATUS
+        // ACTUALIZAR ESTATUS
         function cambiarEstatus(id, nuevoEstatus) {
             let quejas = JSON.parse(localStorage.getItem('db_quejas')) || [];
-            
-            // Buscar el registro y actualizarlo
             const index = quejas.findIndex(q => q.id === id);
             if (index !== -1) {
                 quejas[index].estatus = nuevoEstatus;
                 localStorage.setItem('db_quejas', JSON.stringify(quejas));
-                // No es necesario alertar, el cambio es visualmente inmediato en el select
-                console.log("Estatus actualizado a " + nuevoEstatus);
             }
         }
 
@@ -377,7 +390,7 @@
             let quejas = JSON.parse(localStorage.getItem('db_quejas')) || [];
             if(quejas.length === 0) { alert("Sin datos"); return; }
 
-            let csvContent = "Registrado Por,Fecha Recepcion,Fecha Suceso,Cliente,Telefono,Descripcion,Categoria,Distrito,SOP,Tienda,Accion,Estatus\n";
+            let csvContent = "Registrado Por,Fecha Recibida,Fecha Suceso,Cliente,Telefono,Descripcion,Categoria,Distrito,Supervisor,Tienda,Accion,Estatus\n";
 
             quejas.forEach(q => {
                 let uReg = q.registradoPor || "Desconocido";
