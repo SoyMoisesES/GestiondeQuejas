@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Quejas - La Alemana</title>
+    <style>
+        /* ESTILOS CSS */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #FFC107;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin: 0; color: #333; }
+
+        .screen {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 1000px;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .active { display: block; }
+
+        .login-box { max-width: 400px; margin: 50px auto; text-align: center; }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        input:disabled {
+            background-color: #e9ecef;
+            color: #495057;
+            font-weight: bold;
+        }
+
+        button {
+            background-color: #FFC107;
+            color: #333;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        button:hover { background-color: #e0a800; }
+        
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #c82333; }
+        
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-success:hover { background-color: #218838; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            vertical-align: middle;
+        }
+        th { background-color: #333; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+
+        /* Estilo especial para el select dentro de la tabla */
+        .status-select {
+            padding: 5px;
+            font-size: 0.9em;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .full-width { grid-column: span 2; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>La Alemana - Gestión de Clientes</h1>
+        <div id="userInfo" style="font-size: 14px; margin-top: 5px; font-weight: bold;"></div>
+    </header>
+
+    <div id="loginScreen" class="screen active login-box">
+        <h2>Iniciar Sesión</h2>
+        <input type="text" id="username" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button onclick="login()">Ingresar</button>
+        <p style="font-size: 12px; color: gray;">
+            Admin: admin / 1234<br>
+            Empleado: empleado / 1234
+        </p>
+    </div>
+
+    <div id="registerScreen" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>Registro de Nueva Queja</h2>
+            <button onclick="showScreen('listScreen'); renderTable()">Ver Quejas Registradas</button>
+        </div>
+        <hr>
+        
+        <div class="form-grid">
+            <div class="full-width">
+                <label>Registrado por:</label>
+                <input type="text" id="registradoPor" disabled>
+            </div>
+
+            <div>
+                <label>Fecha Recepción:</label>
+                <input type="date" id="fechaRecepcion">
+            </div>
+            <div>
+                <label>Fecha Suceso:</label>
+                <input type="date" id="fechaSuceso">
+            </div>
+            
+            <div>
+                <label>Nombre Cliente:</label>
+                <input type="text" id="nomCliente" placeholder="Ej: Juan Pérez">
+            </div>
+            <div>
+                <label>Teléfono Cliente:</label>
+                <input type="text" id="telCliente" placeholder="555-0000">
+            </div>
+
+            <div class="full-width">
+                <label>Descripción del Problema:</label>
+                <textarea id="descripcion" rows="3"></textarea>
+            </div>
+
+            <div>
+                <label>Categoría:</label>
+                <select id="categoria">
+                    <option value="Calidad">Calidad</option>
+                    <option value="Servicio">Servicio</option>
+                    <option value="Limpieza">Limpieza</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+            <div>
+                <label>Distrito:</label>
+                <input type="text" id="distrito">
+            </div>
+            <div>
+                <label>SOP (Supervisor):</label>
+                <input type="text" id="sop">
+            </div>
+            <div>
+                <label>Tienda/Sucursal:</label>
+                <input type="text" id="tienda">
+            </div>
+            <div>
+                <label>Acción Tomada:</label>
+                <input type="text" id="accion">
+            </div>
+            <div>
+                <label>Estatus Inicial:</label>
+                <select id="estatus">
+                    <option value="Abierta">Abierta</option>
+                    <option value="En Proceso">En Proceso</option>
+                    <option value="Cerrada">Cerrada</option>
+                </select>
+            </div>
+        </div>
+        <br>
+        <button class="btn-success" onclick="guardarQueja()">Registrar Queja</button>
+        <button class="btn-danger" onclick="logout()">Cerrar Sesión</button>
+    </div>
+
+    <div id="listScreen" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>Bitácora de Quejas</h2>
+            <button onclick="showScreen('registerScreen')">Nueva Queja</button>
+        </div>
+        <hr>
+        <p style="font-size:12px; color:gray;">* Puedes cambiar el estatus directamente seleccionando una opción en la columna "Estatus".</p>
+        
+        <div style="overflow-x:auto;">
+            <table id="quejasTable">
+                <thead>
+                    <tr>
+                        <th>Fecha Rec.</th>
+                        <th>Registró</th>
+                        <th>Cliente</th>
+                        <th>Descripción</th>
+                        <th>Tienda</th>
+                        <th>Estatus (Editar)</th> <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+        
+        <br>
+        <h3>Exportar Datos</h3>
+        <button class="btn-success" onclick="exportarCSV()">Descargar CSV (Excel)</button>
+        <button onclick="exportarTXT()">Descargar TXT (Respaldo)</button>
+    </div>
+
+    <script>
+        // VARIABLE GLOBAL
+        let currentUser = "";
+
+        // 1. NAVEGACIÓN
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(div => div.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // 2. LOGIN
+        function login() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            if((user === 'admin' && pass === '1234') || (user === 'empleado' && pass === '1234')) {
+                currentUser = user;
+                document.getElementById('userInfo').innerText = "Usuario: " + currentUser;
+                document.getElementById('registradoPor').value = currentUser;
+                showScreen('registerScreen');
+                document.getElementById('fechaRecepcion').valueAsDate = new Date();
+            } else {
+                alert("Usuario o contraseña incorrectos");
+            }
+        }
+
+        function logout() {
+            if(confirm("¿Estás seguro de salir?")) {
+                currentUser = "";
+                document.getElementById('username').value = "";
+                document.getElementById('password').value = "";
+                document.getElementById('userInfo').innerText = "";
+                showScreen('loginScreen');
+            }
+        }
+
+        // 3. GUARDAR
+        function guardarQueja() {
+            const queja = {
+                registradoPor: currentUser,
+                fechaRecepcion: document.getElementById('fechaRecepcion').value,
+                fechaSuceso: document.getElementById('fechaSuceso').value,
+                nomCliente: document.getElementById('nomCliente').value,
+                telCliente: document.getElementById('telCliente').value,
+                descripcion: document.getElementById('descripcion').value,
+                categoria: document.getElementById('categoria').value,
+                distrito: document.getElementById('distrito').value,
+                sop: document.getElementById('sop').value,
+                tienda: document.getElementById('tienda').value,
+                accion: document.getElementById('accion').value,
+                estatus: document.getElementById('estatus').value,
+                id: Date.now()
+            };
+
+            if(!queja.nomCliente || !queja.tienda) {
+                alert("Completa Cliente y Tienda.");
+                return;
+            }
+
+            let quejas = JSON.parse(localStorage.getItem('db_quejas')) || [];
+            quejas.push(queja);
+            localStorage.setItem('db_quejas', JSON.stringify(quejas));
+
+            alert("Queja registrada por: " + currentUser);
+            limpiarFormulario();
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('nomCliente').value = "";
+            document.getElementById('telCliente').value = "";
+            document.getElementById('descripcion').value = "";
+            document.getElementById('accion').value = "";
+        }
+
+        // 4. VISUALIZAR Y CAMBIAR ESTATUS
+        function renderTable() {
+            const tbody = document.querySelector('#quejasTable tbody');
+            tbody.innerHTML = "";
+
+            let quejas = JSON.parse(localStorage.getItem('db_quejas')) || [];
+
+            quejas.forEach(q => {
+                // Botón borrar (solo admin)
+                let deleteButton = "";
+                if (currentUser === 'admin') {
+                    deleteButton = `<button onclick="borrarQueja(${q.id})" style="padding:5px; background:#dc3545; color:white; font-size:10px;">X</button>`;
+                } else {
+                    deleteButton = `<span style="color:#999; font-size:10px;">--</span>`;
+                }
+
+                let usuarioReg = q.registradoPor || "Desconocido";
+
+                // SELECT PARA CAMBIAR ESTATUS EN TIEMPO REAL
+                let selectEstatus = `
+                    <select class="status-select" onchange="cambiarEstatus(${q.id}, this.value)">
+                        <option value="Abierta" ${q.estatus === 'Abierta' ? 'selected' : ''}>Abierta</option>
+                        <option value="En Proceso" ${q.estatus === 'En Proceso' ? 'selected' : ''}>En Proceso</option>
+                        <option value="Cerrada" ${q.estatus === 'Cerrada' ? 'selected' : ''}>Cerrada</option>
+                    </select>
+                `;
+
+                let row = `<tr>
+                    <td>${q.fechaRecepcion}</td>
+                    <td><b>${usuarioReg}</b></td>
+                    <td>${q.nomCliente}</td>
+                    <td>${q.descripcion}</td>
+                    <td>${q.tienda}</td>
+                    <td>${selectEstatus}</td>
+                    <td style="text-align:center;">${deleteButton}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // NUEVA FUNCIÓN: ACTUALIZAR ESTATUS
+        function cambiarEstatus(id, nuevoEstatus) {
+            let quejas = JSON.parse(localStorage.getItem('db_quejas')) || [];
+            
+            // Buscar el registro y actualizarlo
+            const index = quejas.findIndex(q => q.id === id);
+            if (index !== -1) {
+                quejas[index].estatus = nuevoEstatus;
+                localStorage.setItem('db_quejas', JSON.stringify(quejas));
+                // No es necesario alertar, el cambio es visualmente inmediato en el select
+                console.log("Estatus actualizado a " + nuevoEstatus);
+            }
+        }
+
+        function borrarQueja(id) {
+            if(currentUser !== 'admin') {
+                alert("Solo el admin puede borrar.");
+                return;
+            }
+            if(confirm("¿Eliminar registro?")) {
+                let quejas = JSON.parse(localStorage.getItem('db_quejas')) || [];
+                quejas = quejas.filter(q => q.id !== id);
+                localStorage.setItem('db_quejas', JSON.stringify(quejas));
+                renderTable();
+            }
+        }
+
+        // 5. EXPORTAR
+        function exportarCSV() {
+            let quejas = JSON.parse(localStorage.getItem('db_quejas')) || [];
+            if(quejas.length === 0) { alert("Sin datos"); return; }
+
+            let csvContent = "Registrado Por,Fecha Recepcion,Fecha Suceso,Cliente,Telefono,Descripcion,Categoria,Distrito,SOP,Tienda,Accion,Estatus\n";
+
+            quejas.forEach(q => {
+                let uReg = q.registradoPor || "Desconocido";
+                let row = [
+                    uReg,
+                    q.fechaRecepcion, q.fechaSuceso, q.nomCliente, q.telCliente, 
+                    q.descripcion.replace(/,/g, " "), q.categoria, q.distrito, 
+                    q.sop, q.tienda, q.accion, q.estatus
+                ].join(",");
+                csvContent += row + "\n";
+            });
+
+            downloadFile(csvContent, 'quejas_alemana.csv', 'text/csv');
+        }
+
+        function exportarTXT() {
+            let quejas = localStorage.getItem('db_quejas') || "[]";
+            downloadFile(quejas, 'backup_quejas.txt', 'text/plain');
+        }
+
+        function downloadFile(content, fileName, mimeType) {
+            const a = document.createElement('a');
+            const blob = new Blob([content], {type: mimeType});
+            const url = URL.createObjectURL(blob);
+            a.setAttribute('href', url);
+            a.setAttribute('download', fileName);
+            a.click();
+        }
+    </script>
+</body>
+</html>
